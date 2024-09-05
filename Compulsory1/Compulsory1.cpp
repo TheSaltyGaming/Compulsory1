@@ -190,6 +190,7 @@ void SetupMeshes()
 
     plane = Mesh(Cube, 1, colors.red);
     plane.globalPosition.y = 1.0f;
+    plane.subDivide()
 }
 
 int main()

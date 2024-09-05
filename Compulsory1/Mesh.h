@@ -20,6 +20,11 @@ public:
     void CreateSquare(float radius, glm::vec3 color);
     void CreatePyramid(float radius, glm::vec3 color);
     void CreateSphere(float radius, int segments, glm::vec3 color);
+
+    void CreateSphere2(float radius, int subdivisions, glm::vec3 color);
+
+    void subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, int n);
+    
     void CreatePlane(float radius, glm::vec3 color);
 
 

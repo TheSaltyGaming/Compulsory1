@@ -170,6 +170,30 @@ void Mesh::CreateSphere(float radius, int segments, glm::vec3 color)
     CalculateBoundingBox();
 }
 
+void Mesh::CreateSphere2(float radius, int subdivisions, glm::vec3 color)
+{
+    
+}
+
+void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, int n)
+{
+    if (n > 0) {
+        glm::vec3 v12 = glm::normalize(v1 + v2);
+        glm::vec3 v23 = glm::normalize(v2 + v3);
+        glm::vec3 v31 = glm::normalize(v3 + v1);
+
+        subDivide(v1, v12, v31, n - 1);
+        subDivide(v2, v23, v12, n - 1);
+        subDivide(v3, v31, v23, n - 1);
+        subDivide(v12, v23, v31, n - 1);
+    }
+    else {
+        vertices.push_back({ v1, glm::normalize(v1), glm::vec3(1.0f, 0.0f, 0.0f) });
+        vertices.push_back({ v2, glm::normalize(v2), glm::vec3(0.0f, 1.0f, 0.0f) });
+        vertices.push_back({ v3, glm::normalize(v3), glm::vec3(0.0f, 0.0f, 1.0f) });
+    }
+}
+
 void Mesh::CreatePlane(float radius, glm::vec3 color)
 {
     // Define plane vertices
