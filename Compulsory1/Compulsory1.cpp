@@ -27,6 +27,11 @@ Mesh sphere_mesh;
 
 Mesh plane_mesh;
 
+Mesh wall1_mesh;
+Mesh wall2_mesh;
+Mesh wall3_mesh;
+Mesh wall4_mesh;
+
 
 // settings
 
@@ -77,6 +82,12 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram)
     sphere_mesh.Draw(ShaderProgram.ID);
     
     plane_mesh.Draw(ShaderProgram.ID);
+
+    wall1_mesh.Draw(ShaderProgram.ID);
+    wall2_mesh.Draw(ShaderProgram.ID);
+    wall3_mesh.Draw(ShaderProgram.ID);
+    wall4_mesh.Draw(ShaderProgram.ID);
+    
     
 }
 
@@ -148,12 +159,30 @@ void SetupMeshes()
 {
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
+    
+    sphere_mesh = Mesh(Sphere, 1.f, 4, colors.red);
+    sphere_mesh.globalPosition.y = 0.5f;
+    sphere_mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
+    plane_mesh = Mesh(Plane, 4, colors.green);
+    plane_mesh.globalPosition.y = -0.5f;
 
-    sphere_mesh = Mesh(Sphere, 1, 3, colors.red);
-    sphere_mesh.globalPosition.y = 1.0f;
-
-    plane_mesh = Mesh(Plane, 2, colors.green);
-    plane_mesh.globalPosition.y = -1.0f;
+    float wallScale = 5.f;
+    float heightScale = 0.5f;
+    wall1_mesh = Mesh(Cube, 1.f, colors.orange);
+    wall1_mesh.globalPosition = glm::vec3(0.0f, 0.0f, -5.0f);
+    wall1_mesh.globalScale = glm::vec3(wallScale, wallScale*heightScale, 0.1f);
+    
+    wall2_mesh = Mesh(Cube, 1.f, colors.cyan);
+    wall2_mesh.globalPosition = glm::vec3(0.0f, 0.0f, 5.0f);
+    wall2_mesh.globalScale = glm::vec3(wallScale, wallScale*heightScale, 0.1f);
+    
+    wall3_mesh = Mesh(Cube, 1.f, colors.yellow);
+    wall3_mesh.globalPosition = glm::vec3(-5.0f, 0.0f, 0.0f);
+    wall3_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
+    
+    wall4_mesh = Mesh(Cube, 1.f, colors.blue);
+    wall4_mesh.globalPosition = glm::vec3(5.0f, 0.0f, 0.0f);
+    wall4_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
 }
 
 int main()

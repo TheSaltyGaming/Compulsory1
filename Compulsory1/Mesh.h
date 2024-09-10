@@ -48,6 +48,7 @@ public:
 
     glm::vec3 globalPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 globalRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 globalScale = glm::vec3(1.0f, 1.0f, 1.0f);
     
     glm::vec3 minVert = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 maxVert = glm::vec3(0.0f, 0.0f, 0.0f);

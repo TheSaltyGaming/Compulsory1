@@ -249,6 +249,7 @@ void Mesh::CreatePlane(float radius, glm::vec3 color)
     };
 
     Setup();
+    CalculateBoundingBox();
 }
 
 void Mesh::Setup()
@@ -299,6 +300,8 @@ void Mesh::Draw(unsigned shaderProgram)
     model = glm::rotate(model, glm::radians(globalRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(globalRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
+    model = glm::scale(model, globalScale);
+    
     int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     
