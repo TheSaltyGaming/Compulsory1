@@ -35,13 +35,13 @@ Mesh::Mesh(MeshType type, float radius, glm::vec3 color)
     }
 }
 
-Mesh::Mesh(MeshType type, float radius, int segments, glm::vec3 color)
+Mesh::Mesh(MeshType type, float radius, int subdivisions, glm::vec3 color)
 {
     mType = type;
     switch (type)
     {
     case Sphere:
-        CreateSphere(radius, segments, color);
+        CreateSphere2(radius, subdivisions, color);
         break;
     default:
         std::cout << "Only sphere accepts int segments" << std::endl;
@@ -170,12 +170,7 @@ void Mesh::CreateSphere(float radius, int segments, glm::vec3 color)
     CalculateBoundingBox();
 }
 
-void Mesh::CreateSphere2(float radius, int subdivisions, glm::vec3 color)
-{
-    
-}
-
-void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, int n)
+void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, int n) 
 {
     if (n > 0) {
         glm::vec3 v12 = glm::normalize(v1 + v2);
@@ -188,10 +183,52 @@ void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& 
         subDivide(v12, v23, v31, n - 1);
     }
     else {
+        // Add vertices and generate indices
+        unsigned int index1 = vertices.size();
         vertices.push_back({ v1, glm::normalize(v1), glm::vec3(1.0f, 0.0f, 0.0f) });
+
+        unsigned int index2 = vertices.size();
         vertices.push_back({ v2, glm::normalize(v2), glm::vec3(0.0f, 1.0f, 0.0f) });
+
+        unsigned int index3 = vertices.size();
         vertices.push_back({ v3, glm::normalize(v3), glm::vec3(0.0f, 0.0f, 1.0f) });
+
+        indices.push_back(index1);
+        indices.push_back(index2);
+        indices.push_back(index3);
     }
+}
+
+void Mesh::CreateSphere2(float radius, int subdivisions, glm::vec3 color)
+{
+    // Define the octahedron vertices and scale them by the radius
+    glm::vec3 v0{ 0, 0, radius };
+    glm::vec3 v1{ radius, 0, 0 };
+    glm::vec3 v2{ 0, radius, 0 };
+    glm::vec3 v3{ -radius, 0, 0 };
+    glm::vec3 v4{ 0, -radius, 0 };
+    glm::vec3 v5{ 0, 0, -radius };
+
+    // Subdivide the 8 faces of the octahedron
+    subDivide(v0, v1, v2, subdivisions);
+    subDivide(v0, v2, v3, subdivisions);
+    subDivide(v0, v3, v4, subdivisions);
+    subDivide(v0, v4, v1, subdivisions);
+    subDivide(v5, v2, v1, subdivisions);
+    subDivide(v5, v3, v2, subdivisions);
+    subDivide(v5, v4, v3, subdivisions);
+    subDivide(v5, v1, v4, subdivisions);
+
+    std::cout << vertices[2].Position.x << std::endl;
+    std::cout << vertices[2].Position.y << std::endl;
+    std::cout << vertices[2].Position.z << std::endl;
+
+    std::cout << vertices[3].Position.x << std::endl;
+    std::cout << vertices[3].Position.y << std::endl;
+    std::cout << vertices[3].Position.z << std::endl;
+
+    Setup();
+    CalculateBoundingBox();
 }
 
 void Mesh::CreatePlane(float radius, glm::vec3 color)
@@ -267,29 +304,12 @@ void Mesh::Draw(unsigned shaderProgram)
     
     glBindVertexArray(VAO);
 
-    switch (mType)
-    {
-    case Cube:
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        break;
-    case Square:
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        break;
-    case Triangle:
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        break;
-    case Pyramid:
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        break;
-    case Sphere:
-        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-        break;
-    }
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 
     glBindVertexArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // glBindVertexArray(0);
 }
 
 bool Mesh::CheckCollision(Mesh* other)

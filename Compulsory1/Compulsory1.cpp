@@ -23,9 +23,10 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram);
 
 Math math;
 
-Mesh plane = Mesh();
+Mesh sphere_mesh;
 
-int CameraMode = 0;
+Mesh plane_mesh;
+
 
 // settings
 
@@ -61,17 +62,7 @@ float lastX = SCR_WIDTH / 2.0f, lastY = SCR_HEIGHT / 2.0f;
 std::string vfs = ShaderLoader::LoadShaderFromFile("Triangle.vs");
 std::string fs = ShaderLoader::LoadShaderFromFile("Triangle.vs");
 
-
-std::vector<Mesh> trophies;
-
 Camera MainCamera;
-
-Mesh playerCube;
-
-Mesh LightCube;
-
-
-Surface testingSurface;
 
 
 std::vector<unsigned> shaderPrograms;
@@ -81,9 +72,11 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram)
     //Drawmeshes here, draw meshes (this comment is for CTRL + F search)
     ShaderProgram.use();
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    plane.Draw(ShaderProgram.ID);
+    sphere_mesh.Draw(ShaderProgram.ID);
+    
+    plane_mesh.Draw(ShaderProgram.ID);
     
 }
 
@@ -125,43 +118,11 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
 
         CameraView(shaderPrograms, model, projection);
 
+        
+        sphere_mesh.globalRotation.y += 10.1f*deltaTime;
+
         //cout camera position
         //std::cout << "Camera Position: " << MainCamera.cameraPos.x << " " << MainCamera.cameraPos.y << " " << MainCamera.cameraPos.z << std::endl;
-        
-
-        math.MapPlayerToSurface(&testingSurface, playerCube, deltaTime);
-
-        if (CameraMode == 1)
-        {
-            MainCamera.cameraPos = playerCube.globalPosition + glm::vec3(0.0f, 5.5f, -4.0f);
-        
-            MainCamera.yaw = -273.f;
-            MainCamera.pitch = -55.f;
-        }
-        else if (CameraMode == 2)
-        {
-            MainCamera.cameraPos = playerCube.globalPosition + glm::vec3(0.0f, 0.5f, 0.0f);
-        }
-        else
-        {
-            MainCamera.cameraPos = glm::vec3(0.0f, 8.0f, -7.0f);
-            MainCamera.yaw = -273.f;
-            MainCamera.pitch = -55.f;
-        }
-        
-        // for (int i = 0; i < trophies.size(); ++i)
-        // {
-        //      // For some reason my AABB stopped working, so I'm using distance for now. Fix later
-        //     if (playerCube.CheckCollision(&trophies[i]))
-        //     {
-        //         std::cout << "Collision with trophy " << i << std::endl;
-        //         trophies.erase(trophies.begin() + i);
-        //         ScoreSystem++;
-        //
-        //         std::cout << "Trophy Collected!!!!!" << std::endl;
-        //         std::cout << "Score: " << ScoreSystem << std::endl;
-        //     }
-        // }
         
         
         
@@ -188,9 +149,11 @@ void SetupMeshes()
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
 
-    plane = Mesh(Cube, 1, colors.red);
-    plane.globalPosition.y = 1.0f;
-    plane.subDivide()
+    sphere_mesh = Mesh(Sphere, 1, 3, colors.red);
+    sphere_mesh.globalPosition.y = 1.0f;
+
+    plane_mesh = Mesh(Plane, 2, colors.green);
+    plane_mesh.globalPosition.y = -1.0f;
 }
 
 int main()
@@ -300,17 +263,17 @@ void processInput(GLFWwindow* window)
     float cameraSpeed = 2.5f * deltaTime;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        playerCube.globalPosition += cameraSpeed * cameraFrontXZ;
+        MainCamera.cameraPos += cameraSpeed * cameraFrontXZ;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        playerCube.globalPosition -= cameraSpeed * cameraFrontXZ;
+        MainCamera.cameraPos -= cameraSpeed * cameraFrontXZ;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        playerCube.globalPosition -= glm::normalize(glm::cross(MainCamera.cameraFront, MainCamera.cameraUp)) * cameraSpeed;
+        MainCamera.cameraPos -= glm::normalize(glm::cross(MainCamera.cameraFront, MainCamera.cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        playerCube.globalPosition += glm::normalize(glm::cross(MainCamera.cameraFront, MainCamera.cameraUp)) * cameraSpeed;
+        MainCamera.cameraPos += glm::normalize(glm::cross(MainCamera.cameraFront, MainCamera.cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        playerCube.globalPosition += cameraSpeed * MainCamera.cameraUp; // Move camera up
+        MainCamera.cameraPos += cameraSpeed * MainCamera.cameraUp; // Move camera up
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        playerCube.globalPosition -= cameraSpeed * MainCamera.cameraUp; // Move camera down
+        MainCamera.cameraPos -= cameraSpeed * MainCamera.cameraUp; // Move camera down
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
         MainCamera.cameraPos.y += 0.01;
@@ -326,21 +289,6 @@ void processInput(GLFWwindow* window)
         {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
-    }
-    
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-    {
-        CameraMode = 0;
-    }
-    
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-    {
-        CameraMode = 1;
-    }
-    
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-    {
-        CameraMode = 2;
     }
 }
 
