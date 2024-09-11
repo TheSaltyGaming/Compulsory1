@@ -283,24 +283,22 @@ void Mesh::Setup()
 
 void Mesh::CalculateBoundingBox()
 {
-    minVert = maxVert = vertices[0].Position;
+    glm::mat4 model = GetTransform();
+
+    minVert = glm::vec3(FLT_MAX);
+    maxVert = glm::vec3(-FLT_MAX);
+    
     for (const auto& vertex : vertices)
     {
-        minVert = glm::min(minVert, vertex.Position);
-        maxVert = glm::max(maxVert, vertex.Position);
+        glm::vec3 worldVert = glm::vec3(model * glm::vec4(vertex.Position, 1.0f));
+        minVert = glm::min(minVert, worldVert);
+        maxVert = glm::max(maxVert, worldVert);
     }
 }
 
 void Mesh::Draw(unsigned shaderProgram)
 {
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, globalPosition);
-    
-    model = glm::rotate(model, glm::radians(globalRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(globalRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(globalRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    model = glm::scale(model, globalScale);
+    glm::mat4 model = GetTransform();
     
     int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -313,28 +311,86 @@ void Mesh::Draw(unsigned shaderProgram)
 
     // glBindBuffer(GL_ARRAY_BUFFER, 0);
     // glBindVertexArray(0);
+
+    CalculateBoundingBox();
+    DrawBoundingBox(shaderProgram);
 }
 
 bool Mesh::CheckCollision(Mesh* other)
 {
-    // Calculate the bounding box in world space
-    glm::vec3 worldMinVert = minVert + globalPosition;
-    glm::vec3 worldMaxVert = maxVert + globalPosition;
-
-    // Calculate other mesh bounding box in world space
-    glm::vec3 otherWorldMinVert = other->minVert + other->globalPosition;
-    glm::vec3 otherWorldMaxVert = other->maxVert + other->globalPosition;
-
-    // Check overlap
-    bool overlapX = worldMinVert.x <= otherWorldMaxVert.x && worldMaxVert.x >= otherWorldMinVert.x;
-    bool overlapY = worldMinVert.y <= otherWorldMaxVert.y && worldMaxVert.y >= otherWorldMinVert.y;
-    bool overlapZ = worldMinVert.z <= otherWorldMaxVert.z && worldMaxVert.z >= otherWorldMinVert.z;
-
-    // Collision only if overlap on all axes
+    
+    bool overlapX = minVert.x <= other->maxVert.x && maxVert.x >= other->minVert.x;
+    bool overlapY = minVert.y <= other->maxVert.y && maxVert.y >= other->minVert.y;
+    bool overlapZ = minVert.z <= other->maxVert.z && maxVert.z >= other->minVert.z;
+    
     std::cout << "Collision: " << overlapX << " " << overlapY << " " << overlapZ << std::endl;
-
-
-    // std::cout << "worldMinVert: " << worldMinVert.x << " " << worldMinVert.y << " " << worldMinVert.z << std::endl;
-    // std::cout << "worldMaxVert: " << worldMaxVert.x << " " << worldMaxVert.y << " " << worldMaxVert.z << std::endl;
+    
     return overlapX && overlapY && overlapZ;
+}
+
+glm::mat4 Mesh::GetTransform()
+{
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, globalPosition);
+    
+    model = glm::rotate(model, glm::radians(globalRotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(globalRotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(globalRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    model = glm::scale(model, globalScale);
+    return model;
+}
+
+void Mesh::DrawBoundingBox(unsigned int shaderProgram)
+{
+    glm::vec3 vertices[8] = {
+        minVert,
+        glm::vec3(minVert.x, minVert.y, maxVert.z),
+        glm::vec3(minVert.x, maxVert.y, minVert.z),
+        glm::vec3(minVert.x, maxVert.y, maxVert.z),
+        glm::vec3(maxVert.x, minVert.y, minVert.z),
+        glm::vec3(maxVert.x, minVert.y, maxVert.z),
+        glm::vec3(maxVert.x, maxVert.y, minVert.z),
+        maxVert
+    };
+    
+    
+    unsigned int indices[24] = {
+        0, 1, 1, 5, 5, 4, 4, 0, // bottom face
+        2, 3, 3, 7, 7, 6, 6, 2, // top face
+        0, 2, 1, 3, 5, 7, 4, 6  // vertical lines
+    };
+
+    unsigned int VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glUseProgram(shaderProgram);
+    
+    glm::mat4 model = glm::mat4(1.0f);
+    int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.f)));
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 }

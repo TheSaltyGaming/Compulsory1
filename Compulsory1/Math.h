@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Camera.h"
-#include "Mesh.h"
-#include "Surface.h"
+#include "Mesh/Mesh.h"
+#include "Mesh/Surface.h"
 #include "Vertex.h"
 
 class Math

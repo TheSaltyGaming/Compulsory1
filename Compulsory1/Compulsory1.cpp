@@ -9,8 +9,8 @@
 
 #include "Camera.h"
 #include "Math.h"
-#include "Mesh.h"
-#include "Surface.h"
+#include "Mesh/Mesh.h"
+#include "Mesh/Surface.h"
 #include "glm/mat4x3.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -26,6 +26,9 @@ Math math;
 Mesh sphere_mesh;
 
 Mesh plane_mesh;
+
+Mesh cube_mesh;
+Mesh CameraMesh;
 
 Mesh wall1_mesh;
 Mesh wall2_mesh;
@@ -87,6 +90,9 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram)
     wall2_mesh.Draw(ShaderProgram.ID);
     wall3_mesh.Draw(ShaderProgram.ID);
     wall4_mesh.Draw(ShaderProgram.ID);
+
+    cube_mesh.Draw(ShaderProgram.ID);
+    //CameraMesh.Draw(ShaderProgram.ID);
     
     
 }
@@ -131,6 +137,16 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
 
         
         sphere_mesh.globalRotation.y += 10.1f*deltaTime;
+        sphere_mesh.globalPosition.z -= 1.1f*deltaTime;
+
+
+        //cube_mesh.globalRotation.x += 10.f*deltaTime;
+        cube_mesh.globalPosition -= 0.05f*deltaTime;
+
+        CameraMesh.globalPosition = MainCamera.cameraPos;
+        CameraMesh.CalculateBoundingBox();
+
+        
 
         //cout camera position
         //std::cout << "Camera Position: " << MainCamera.cameraPos.x << " " << MainCamera.cameraPos.y << " " << MainCamera.cameraPos.z << std::endl;
@@ -147,6 +163,8 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         DrawObjects(VAO, ourShader);
+
+        CameraMesh.CheckCollision(&cube_mesh);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -166,22 +184,29 @@ void SetupMeshes()
     plane_mesh = Mesh(Plane, 4, colors.green);
     plane_mesh.globalPosition.y = -0.5f;
 
-    float wallScale = 5.f;
-    float heightScale = 0.5f;
+
+    cube_mesh = Mesh(Cube, 1.f, colors.blue);
+    cube_mesh.globalPosition = glm::vec3(0.0f, 4.0f, 0.0f);
+
+    CameraMesh = Mesh(Cube, 0.5f, colors.white);
+    CameraMesh.globalPosition = MainCamera.cameraPos;
+    
+    float wallScale = 4.f;
+    float heightScale = 0.4f;
     wall1_mesh = Mesh(Cube, 1.f, colors.orange);
-    wall1_mesh.globalPosition = glm::vec3(0.0f, 0.0f, -5.0f);
+    wall1_mesh.globalPosition = glm::vec3(0.0f, 0.0f, -4.0f);
     wall1_mesh.globalScale = glm::vec3(wallScale, wallScale*heightScale, 0.1f);
     
     wall2_mesh = Mesh(Cube, 1.f, colors.cyan);
-    wall2_mesh.globalPosition = glm::vec3(0.0f, 0.0f, 5.0f);
+    wall2_mesh.globalPosition = glm::vec3(0.0f, 0.0f, 4.0f);
     wall2_mesh.globalScale = glm::vec3(wallScale, wallScale*heightScale, 0.1f);
     
     wall3_mesh = Mesh(Cube, 1.f, colors.yellow);
-    wall3_mesh.globalPosition = glm::vec3(-5.0f, 0.0f, 0.0f);
+    wall3_mesh.globalPosition = glm::vec3(-4.0f, 0.0f, 0.0f);
     wall3_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
     
     wall4_mesh = Mesh(Cube, 1.f, colors.blue);
-    wall4_mesh.globalPosition = glm::vec3(5.0f, 0.0f, 0.0f);
+    wall4_mesh.globalPosition = glm::vec3(4.0f, 0.0f, 0.0f);
     wall4_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
 }
 

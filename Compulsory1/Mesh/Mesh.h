@@ -2,7 +2,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "Vertex.h"
+#include "../Vertex.h"
+
 
 enum MeshType {Cube, Triangle, Square, Pyramid, Sphere, Plane};
 
@@ -34,6 +35,8 @@ public:
     void Draw(unsigned int shaderProgram);
 
     bool CheckCollision(Mesh* other);
+
+    glm::mat4 GetTransform();
     
     MeshType mType;
 
@@ -52,4 +55,6 @@ public:
     
     glm::vec3 minVert = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 maxVert = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    void DrawBoundingBox(unsigned int ShaderProgram);
 };
