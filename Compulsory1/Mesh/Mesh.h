@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include <vector>
-#include <glm/glm.hpp>
-
 #include "../Vertex.h"
+#include "glm/fwd.hpp"
+#include "glm/vec3.hpp"
 
 
 enum MeshType {Cube, Triangle, Square, Pyramid, Sphere, Plane};
