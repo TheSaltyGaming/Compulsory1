@@ -36,6 +36,8 @@ public:
 
     bool CheckCollision(Mesh* other);
 
+    bool SphereCollision(Mesh* other);
+
     glm::mat4 GetTransform();
     
     MeshType mType;
@@ -57,4 +59,11 @@ public:
     glm::vec3 maxVert = glm::vec3(0.0f, 0.0f, 0.0f);
 
     void DrawBoundingBox(unsigned int ShaderProgram);
+
+    void Physics(float deltaTime);
+
+    float mass = 10;
+    float Radius = 1;
+    glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+    
 };

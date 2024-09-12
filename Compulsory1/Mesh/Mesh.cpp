@@ -201,6 +201,8 @@ void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& 
 
 void Mesh::CreateSphere2(float radius, int subdivisions, glm::vec3 color)
 {
+    Radius = radius;
+    
     // Define the octahedron vertices and scale them by the radius
     glm::vec3 v0{ 0, 0, radius };
     glm::vec3 v1{ radius, 0, 0 };
@@ -323,9 +325,62 @@ bool Mesh::CheckCollision(Mesh* other)
     bool overlapY = minVert.y <= other->maxVert.y && maxVert.y >= other->minVert.y;
     bool overlapZ = minVert.z <= other->maxVert.z && maxVert.z >= other->minVert.z;
     
-    std::cout << "Collision: " << overlapX << " " << overlapY << " " << overlapZ << std::endl;
+    bool collision = overlapX && overlapY && overlapZ;
+
+    std::cout << overlapX << " " << overlapY << " " << overlapZ << std::endl;
     
-    return overlapX && overlapY && overlapZ;
+    if (collision)
+    {
+        //std::cout << "Collision detected" << std::endl;
+        //print overlap x y and z
+        
+
+        // Calculate collision normal
+        glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
+
+        // Reflect velocity
+        velocity = glm::reflect(velocity, collisionNormal);
+    }
+    
+    return collision;
+}
+
+bool Mesh::SphereCollision(Mesh* other)
+{
+    
+    auto P0 = globalPosition - velocity;
+    auto Q0 = other->globalPosition - other->velocity;
+    auto A = P0 - Q0;
+    auto B = velocity - other->velocity;
+    auto AB = glm::dot(A, B);
+    auto AA = glm::dot(A, A);
+    auto BB = glm::dot(B, B);
+    auto d = Radius + other->Radius;
+    auto rot = AB * AB - BB * (AA - d * d);
+
+    float t = 1.f;
+    if (rot >= 0)
+    {
+        t = (-AB - sqrt(rot));
+    }
+    if (BB > FLT_EPSILON)
+    {
+        t = t/BB;
+    }
+    
+    bool collision = t >= 0 && t <= 1;
+
+    if (collision)
+    {
+        //cout collision
+        std::cout << "Collision detected" << std::endl;
+        glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
+
+        // Reflect velocity
+        velocity = glm::reflect(velocity, collisionNormal);
+    }
+
+    return collision;
 }
 
 glm::mat4 Mesh::GetTransform()
@@ -338,6 +393,9 @@ glm::mat4 Mesh::GetTransform()
     model = glm::rotate(model, glm::radians(globalRotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
     model = glm::scale(model, globalScale);
+    
+    Radius = 1 * globalScale.x;
+    
     return model;
 }
 
@@ -393,4 +451,9 @@ void Mesh::DrawBoundingBox(unsigned int shaderProgram)
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
+}
+
+void Mesh::Physics(float deltaTime)
+{
+    globalPosition += velocity * deltaTime;
 }

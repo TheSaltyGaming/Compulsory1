@@ -20,10 +20,14 @@ void CameraView(std::vector<unsigned> shaderPrograms, glm::mat4 trans, glm::mat4
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void DrawObjects(unsigned VAO, Shader ShaderProgram);
 
+void CollisionChecking();
+
 
 Math math;
 
 Mesh sphere_mesh;
+
+Mesh sphere2Mesh;
 
 Mesh plane_mesh;
 
@@ -83,6 +87,7 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram)
     // glDrawArrays(GL_TRIANGLES, 0, 3);
 
     sphere_mesh.Draw(ShaderProgram.ID);
+    sphere2Mesh.Draw(ShaderProgram.ID);
     
     plane_mesh.Draw(ShaderProgram.ID);
 
@@ -134,10 +139,7 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
 
 
         CameraView(shaderPrograms, model, projection);
-
         
-        sphere_mesh.globalRotation.y += 10.1f*deltaTime;
-        sphere_mesh.globalPosition.z -= 1.1f*deltaTime;
 
 
         //cube_mesh.globalRotation.x += 10.f*deltaTime;
@@ -146,8 +148,7 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
         CameraMesh.globalPosition = MainCamera.cameraPos;
         CameraMesh.CalculateBoundingBox();
 
-        
-
+        sphere_mesh.Physics(deltaTime);
         //cout camera position
         //std::cout << "Camera Position: " << MainCamera.cameraPos.x << " " << MainCamera.cameraPos.y << " " << MainCamera.cameraPos.z << std::endl;
         
@@ -164,7 +165,8 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
         
         DrawObjects(VAO, ourShader);
 
-        CameraMesh.CheckCollision(&cube_mesh);
+        CollisionChecking();
+        
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -181,6 +183,15 @@ void SetupMeshes()
     sphere_mesh = Mesh(Sphere, 1.f, 4, colors.red);
     sphere_mesh.globalPosition.y = 0.5f;
     sphere_mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+    sphere2Mesh = Mesh(Sphere, 1.f, 4, colors.magenta);
+    sphere2Mesh.globalPosition.y = 0.5f;
+    sphere2Mesh.globalPosition.x = 4.f;
+    sphere2Mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
+
+    sphere_mesh.velocity = glm::vec3(0.4f, 0.0f, 0.0f);
+    
+    
     plane_mesh = Mesh(Plane, 4, colors.green);
     plane_mesh.globalPosition.y = -0.5f;
 
@@ -418,3 +429,14 @@ void CameraView(std::vector<unsigned> shaderPrograms, glm::mat4 trans, glm::mat4
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
     }
 }
+
+void CollisionChecking()
+{
+    sphere_mesh.SphereCollision(&sphere2Mesh);
+    sphere_mesh.CheckCollision(&wall1_mesh);
+    sphere_mesh.CheckCollision(&wall2_mesh);
+    sphere_mesh.CheckCollision(&wall3_mesh);
+    sphere_mesh.CheckCollision(&wall4_mesh);
+
+}
+
