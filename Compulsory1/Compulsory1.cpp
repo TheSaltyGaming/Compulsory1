@@ -192,20 +192,22 @@ void SetupMeshes()
 {
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
-
-    for (int i = 0; i < 12; ++i) {
+    int SphereCount = 40;
+    
+    for (int i = 0; i < SphereCount; ++i) {
         Mesh* sphere = new Mesh(Sphere, 1.f, 4, RandomColor());
+
         sphere->globalPosition = glm::vec3(
-            math.RandomVec3(-3,3).x,
-            0.5f, // y
-            math.RandomVec3(-3,3).z
-        );
-        sphere->globalScale = glm::vec3(0.3f, 0.3f, 0.3f);
+        math.RandomVec3(-3, 3).x,
+        0.5f, // y
+        math.RandomVec3(-3, 3).z);
+        
+        sphere->globalScale = glm::vec3(0.1f, 0.1f, 0.1f);
         sphere->velocity = glm::vec3(
-            static_cast<float>(rand()) / RAND_MAX * 4.0f - 2.0f, // Random x velocity from -2 to 2
-            0.0f, // y velocity
-            static_cast<float>(rand()) / RAND_MAX * 4.0f - 2.0f  // Random z velocity from -2 to 2
-        );
+        math.RandomVec3(-2, 2).x,
+        0.0f, // y
+        math.RandomVec3(-2, 2).z); // Random z velocity from -2 to 2
+
         sphereMeshes.push_back(sphere);
     }
 
@@ -345,6 +347,24 @@ void processInput(GLFWwindow* window)
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        //get a random sphere and set velocity to 5 on x and 4 on y
+        int randomSphere = rand() % sphereMeshes.size();
+        if (sphereMeshes[randomSphere]->velocity == glm::vec3(0.f,0.f,0.f))
+        {
+            sphereMeshes[randomSphere]->velocity = glm::vec3(math.RandomVec3(-2, 2).x, 0.0f, math.RandomVec3(-2, 2).z);
+        }
+    }
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+    {
+        for (Mesh* sphere : sphereMeshes)
+        {
+            sphere->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+        }
+    }
+    
 
     float cameraSpeed = 2.5f * deltaTime;
 

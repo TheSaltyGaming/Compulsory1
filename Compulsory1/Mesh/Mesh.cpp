@@ -334,7 +334,16 @@ bool Mesh::SphereCollision(Mesh* other)
         std::cout << "Sphere Collision detected" << std::endl;
         glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
         
+        // Calculate penetration depth
+        float penetrationDepth = sumRadius - distance;
+
+        // Adjust positions to prevent clipping
+        globalPosition += collisionNormal * (penetrationDepth / 2.0f);
+        other->globalPosition -= collisionNormal * (penetrationDepth / 2.0f);
+
+        // Reflect velocity
         velocity = glm::reflect(velocity, collisionNormal);
+        other->velocity = glm::reflect(other->velocity, -collisionNormal);
     }
     return collision;
 }
