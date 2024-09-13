@@ -334,10 +334,10 @@ bool Mesh::SphereCollision(Mesh* other)
         std::cout << "Sphere Collision detected" << std::endl;
         glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
         
-        // Calculate penetration depth
+        
         float penetrationDepth = sumRadius - distance;
 
-        // Adjust positions to prevent clipping
+        // No more clipping hopefully
         globalPosition += collisionNormal * (penetrationDepth / 2.0f);
         other->globalPosition -= collisionNormal * (penetrationDepth / 2.0f);
 
