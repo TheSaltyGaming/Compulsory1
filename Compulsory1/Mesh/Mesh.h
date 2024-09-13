@@ -4,7 +4,6 @@
 #include "glm/fwd.hpp"
 #include "glm/vec3.hpp"
 
-
 enum MeshType {Cube, Triangle, Square, Pyramid, Sphere, Plane};
 
 class Mesh
@@ -20,7 +19,6 @@ public:
     void CreateTriangle(float radius, glm::vec3 color);
     void CreateSquare(float radius, glm::vec3 color);
     void CreatePyramid(float radius, glm::vec3 color);
-    void CreateSphere(float radius, int segments, glm::vec3 color);
 
     void CreateSphere2(float radius, int subdivisions, glm::vec3 color);
 
@@ -68,5 +66,11 @@ public:
     float mass = 1;
     float Radius = 1;
     glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    glm::vec3 boundingBoxCorners [8];
+
+    void CalculateInitialBoundingBox();
+
+    glm::vec3 ObjectColor = glm::vec3(1.0f, 1.0f, 1.0f);
     
 };

@@ -569,8 +569,10 @@
     <Content Include="Dependency\includes\assimp\.editorconfig" />
     <Content Include="Dependency\includes\assimp\config.h.in" />
     <Content Include="Dependency\includes\glm\CMakeLists.txt" />
+    <Content Include="FragmentShader.frag" />
     <Content Include="FragShaderOld.frag" />
     <Content Include="Triangle.vs" />
+    <Content Include="VertShader.vert" />
     <Content Include="VertShaderOld.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

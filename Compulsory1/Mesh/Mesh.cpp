@@ -52,17 +52,19 @@ Mesh::Mesh(MeshType type, float radius, int subdivisions, glm::vec3 color)
 
 void Mesh::CreateCube(float radius, glm::vec3 color)
 {
+    glm::vec3 color2 = color+glm::vec3(0.2f, 0.2f, 0.2f);
+    glm::vec3 color3 = color-glm::vec3(0.2f, 0.2f, 0.2f);
     // Define cube vertices
     vertices = {
         // Positions           // Normals           // Color
         { glm::vec3(-radius, -radius, -radius), glm::vec3(-1.0f, -1.0f, -1.0f), color },
         { glm::vec3(radius, -radius, -radius), glm::vec3(1.0f, -1.0f, -1.0f), color },
         { glm::vec3(radius, radius, -radius), glm::vec3(1.0f, 1.0f, -1.0f), color },
-        { glm::vec3(-radius, radius, -radius), glm::vec3(-1.0f, 1.0f, -1.0f), color },
-        { glm::vec3(-radius, -radius, radius), glm::vec3(-1.0f, -1.0f, 1.0f), color },
-        { glm::vec3(radius, -radius, radius), glm::vec3(1.0f, -1.0f, 1.0f), color },
-        { glm::vec3(radius, radius, radius), glm::vec3(1.0f, 1.0f, 1.0f), color },
-        { glm::vec3(-radius, radius, radius), glm::vec3(-1.0f, 1.0f, 1.0f), color }
+        { glm::vec3(-radius, radius, -radius), glm::vec3(-1.0f, 1.0f, -1.0f), color2 },
+        { glm::vec3(-radius, -radius, radius), glm::vec3(-1.0f, -1.0f, 1.0f), color2 },
+        { glm::vec3(radius, -radius, radius), glm::vec3(1.0f, -1.0f, 1.0f), color3 },
+        { glm::vec3(radius, radius, radius), glm::vec3(1.0f, 1.0f, 1.0f), color3 },
+        { glm::vec3(-radius, radius, radius), glm::vec3(-1.0f, 1.0f, 1.0f), color3 }
     };
 
     // Define triangles
@@ -76,6 +78,7 @@ void Mesh::CreateCube(float radius, glm::vec3 color)
     };
 
     Setup();
+    CalculateInitialBoundingBox();
 }
 
 void Mesh::CreateTriangle(float radius, glm::vec3 color)
@@ -138,36 +141,7 @@ void Mesh::CreatePyramid(float radius, glm::vec3 color)
     };
 
     Setup();
-    CalculateBoundingBox();
-} 
-
-void Mesh::CreateSphere(float radius, int segments, glm::vec3 color)
-{
-
-    for (int i = 0; i <= segments; ++i) {
-        for (int j = 0; j <= segments; ++j) {
-            float y = radius * cos(glm::radians(180.0f - i * 180.0f / segments));
-            float x = radius * cos(glm::radians(j * 360.0f / segments)) * sin(glm::radians(180.0f - i * 180.0f / segments));
-            float z = radius * sin(glm::radians(j * 360.0f / segments)) * sin(glm::radians(180.0f - i * 180.0f / segments));
-
-            vertices.emplace_back(glm::vec3(x,y,z), glm::normalize(glm::vec3(x, y, z)), color);
-        }
-    }
-
-    for (int i = 0; i < segments; ++i) {
-        for (int j = 0; j < segments; ++j) {
-            indices.push_back(i * (segments + 1) + j);
-            indices.push_back((i + 1) * (segments + 1) + j);
-            indices.push_back((i + 1) * (segments + 1) + j + 1);
-
-            indices.push_back(i * (segments + 1) + j);
-            indices.push_back((i + 1) * (segments + 1) + j + 1);
-            indices.push_back(i * (segments + 1) + j + 1);
-        }
-    }
-
-    Setup();
-    CalculateBoundingBox();
+    CalculateInitialBoundingBox();
 }
 
 void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, int n) 
@@ -185,13 +159,13 @@ void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& 
     else {
         // Add vertices and generate indices
         unsigned int index1 = vertices.size();
-        vertices.push_back({ v1, glm::normalize(v1), glm::vec3(1.0f, 0.0f, 0.0f) });
+        vertices.push_back({ v1, glm::normalize(v1), ObjectColor });
 
         unsigned int index2 = vertices.size();
-        vertices.push_back({ v2, glm::normalize(v2), glm::vec3(0.0f, 1.0f, 0.0f) });
+        vertices.push_back({ v2, glm::normalize(v2), ObjectColor-glm::vec3(0.3,0.3,0.3) });
 
         unsigned int index3 = vertices.size();
-        vertices.push_back({ v3, glm::normalize(v3), glm::vec3(0.0f, 0.0f, 1.0f) });
+        vertices.push_back({ v3, glm::normalize(v3), ObjectColor-glm::vec3(0.2,0.2,0.2) });
 
         indices.push_back(index1);
         indices.push_back(index2);
@@ -202,6 +176,7 @@ void Mesh::subDivide(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& 
 void Mesh::CreateSphere2(float radius, int subdivisions, glm::vec3 color)
 {
     Radius = radius;
+    ObjectColor = color;
     
     // Define the octahedron vertices and scale them by the radius
     glm::vec3 v0{ 0, 0, radius };
@@ -230,17 +205,19 @@ void Mesh::CreateSphere2(float radius, int subdivisions, glm::vec3 color)
     std::cout << vertices[3].Position.z << std::endl;
 
     Setup();
-    CalculateBoundingBox();
+    CalculateInitialBoundingBox();
 }
 
 void Mesh::CreatePlane(float radius, glm::vec3 color)
 {
+    glm::vec3 color2 = color+glm::vec3(0.2f, 0.2f, 0.2f);
+    glm::vec3 color3 = color-glm::vec3(0.2f, 0.2f, 0.2f);
     // Define plane vertices
     vertices = {
         // Positions           // Normals           // Color
         { glm::vec3(-radius, 0.0f, -radius), glm::vec3(0.0f, 1.0f, 0.0f), color },
-        {  glm::vec3(radius, 0.0f, -radius), glm::vec3(0.0f, 1.0f, 0.0f), color },
-        {  glm::vec3(radius, 0.0f,  radius), glm::vec3(0.0f, 1.0f, 0.0f), color },
+        {  glm::vec3(radius, 0.0f, -radius), glm::vec3(0.0f, 1.0f, 0.0f), color2 },
+        {  glm::vec3(radius, 0.0f,  radius), glm::vec3(0.0f, 1.0f, 0.0f), color3 },
         { glm::vec3(-radius, 0.0f,  radius), glm::vec3(0.0f, 1.0f, 0.0f), color }
     };
 
@@ -251,7 +228,7 @@ void Mesh::CreatePlane(float radius, glm::vec3 color)
     };
 
     Setup();
-    CalculateBoundingBox();
+    CalculateInitialBoundingBox();
 }
 
 void Mesh::Setup()
@@ -289,10 +266,10 @@ void Mesh::CalculateBoundingBox()
 
     minVert = glm::vec3(FLT_MAX);
     maxVert = glm::vec3(-FLT_MAX);
-    
-    for (const auto& vertex : vertices)
+
+    for (const auto& corner : boundingBoxCorners)
     {
-        glm::vec3 worldVert = glm::vec3(model * glm::vec4(vertex.Position, 1.0f));
+        glm::vec3 worldVert = glm::vec3(model * glm::vec4(corner, 1.0f));
         minVert = glm::min(minVert, worldVert);
         maxVert = glm::max(maxVert, worldVert);
     }
@@ -315,7 +292,7 @@ void Mesh::Draw(unsigned shaderProgram)
     // glBindVertexArray(0);
 
     CalculateBoundingBox();
-    DrawBoundingBox(shaderProgram);
+    // DrawBoundingBox(shaderProgram);
 }
 
 bool Mesh::CheckCollision(Mesh* other)
@@ -486,4 +463,25 @@ glm::vec3 Mesh::ClosestPointOnAABB(glm::vec3& point) const
     }
 
     return closestPoint;
+}
+
+void Mesh::CalculateInitialBoundingBox()
+{
+    minVert = glm::vec3(FLT_MAX);
+    maxVert = glm::vec3(-FLT_MAX);
+
+    for (const auto& vertex : vertices)
+    {
+        minVert = glm::min(minVert, vertex.Position);
+        maxVert = glm::max(maxVert, vertex.Position);
+    }
+
+    boundingBoxCorners[0] = minVert;
+    boundingBoxCorners[1] = glm::vec3(minVert.x, minVert.y, maxVert.z);
+    boundingBoxCorners[2] = glm::vec3(minVert.x, maxVert.y, minVert.z);
+    boundingBoxCorners[3] = glm::vec3(minVert.x, maxVert.y, maxVert.z);
+    boundingBoxCorners[4] = glm::vec3(maxVert.x, minVert.y, minVert.z);
+    boundingBoxCorners[5] = glm::vec3(maxVert.x, minVert.y, maxVert.z);
+    boundingBoxCorners[6] = glm::vec3(maxVert.x, maxVert.y, minVert.z);
+    boundingBoxCorners[7] = maxVert;
 }

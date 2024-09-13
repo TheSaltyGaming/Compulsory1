@@ -37,7 +37,7 @@ Mesh sphere2Mesh;
 
 Mesh plane_mesh;
 
-Mesh cube_mesh;
+
 Mesh CameraMesh;
 
 Mesh wall1_mesh;
@@ -107,8 +107,6 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram)
     wall2_mesh.Draw(ShaderProgram.ID);
     wall3_mesh.Draw(ShaderProgram.ID);
     wall4_mesh.Draw(ShaderProgram.ID);
-
-    cube_mesh.Draw(ShaderProgram.ID);
     //CameraMesh.Draw(ShaderProgram.ID);
     
     
@@ -153,10 +151,6 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
         CameraView(shaderPrograms, model, projection);
         
 
-
-        //cube_mesh.globalRotation.x += 10.f*deltaTime;
-        cube_mesh.globalPosition -= 0.05f*deltaTime;
-
         CameraMesh.globalPosition = MainCamera.cameraPos;
         CameraMesh.CalculateBoundingBox();
 
@@ -199,14 +193,14 @@ void SetupMeshes()
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 12; ++i) {
         Mesh* sphere = new Mesh(Sphere, 1.f, 4, RandomColor());
         sphere->globalPosition = glm::vec3(
-            static_cast<float>(rand()) / RAND_MAX * 8.0f - 3.0f, // Random x position from -2 to 2
-            0.5f, // y position
-            static_cast<float>(rand()) / RAND_MAX * 8.0f - 3.0f  // Random z position from -2 to 2
+            math.RandomVec3(-3,3).x,
+            0.5f, // y
+            math.RandomVec3(-3,3).z
         );
-        sphere->globalScale = glm::vec3(0.2f, 0.2f, 0.2f);
+        sphere->globalScale = glm::vec3(0.3f, 0.3f, 0.3f);
         sphere->velocity = glm::vec3(
             static_cast<float>(rand()) / RAND_MAX * 4.0f - 2.0f, // Random x velocity from -2 to 2
             0.0f, // y velocity
@@ -214,29 +208,12 @@ void SetupMeshes()
         );
         sphereMeshes.push_back(sphere);
     }
-    
-    // sphere_mesh = Mesh(Sphere, 1.f, 4, colors.red);
-    // sphere_mesh.globalPosition.y = 0.5f;
-    // sphere_mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
-    // sphereMeshes.push_back(&sphere_mesh);
-    //
-    // sphere2Mesh = Mesh(Sphere, 1.f, 4, colors.magenta);
-    // sphere2Mesh.globalPosition.y = 0.5f;
-    // sphere2Mesh.globalPosition.x = 2.f;
-    // sphere2Mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
-    // sphereMeshes.push_back(&sphere2Mesh);
-    //
-    // sphere_mesh.velocity = glm::vec3(2.0f, 0.0f, 1.1f);
-    // sphere2Mesh.velocity = glm::vec3(-2.0f, 0.0f, -1.1f);
-    
-    
+
+#pragma region OtherMeshes
     plane_mesh = Mesh(Plane, 4, colors.green);
     plane_mesh.globalPosition.y = -0.5f;
     wallMeshes.push_back(&plane_mesh);
-
-
-    cube_mesh = Mesh(Cube, 1.f, colors.blue);
-    cube_mesh.globalPosition = glm::vec3(0.0f, 4.0f, 0.0f);
+    
 
     CameraMesh = Mesh(Cube, 0.5f, colors.white);
     CameraMesh.globalPosition = MainCamera.cameraPos;
@@ -262,6 +239,7 @@ void SetupMeshes()
     wall4_mesh.globalPosition = glm::vec3(4.0f, 0.0f, 0.0f);
     wall4_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
     wallMeshes.push_back(&wall4_mesh);
+#pragma endregion
 }
 
 int main()

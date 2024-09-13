@@ -24,6 +24,8 @@ public:
 
     void MapPlayerToSurface(Surface* surface, Mesh& MainMesh, float deltaTime);
 
+    glm::vec3 RandomVec3(float min, float max);
+
     
     
     

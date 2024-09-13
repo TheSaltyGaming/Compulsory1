@@ -141,5 +141,13 @@ void Math::MapPlayerToSurface(Surface* surface, Mesh& MainMesh, float deltaTime)
     }
 }
 
+glm::vec3 Math::RandomVec3(float min, float max)
+{
+    float x = min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+    float y = min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+    float z = min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+    return glm::vec3(x, y, z);
+}
+
 
 
