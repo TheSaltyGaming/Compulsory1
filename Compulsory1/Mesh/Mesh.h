@@ -62,7 +62,10 @@ public:
 
     void Physics(float deltaTime);
 
-    float mass = 10;
+    bool SphereToAABBCollision(Mesh* other);
+    glm::vec3 ClosestPointOnAABB(glm::vec3& point) const;
+
+    float mass = 1;
     float Radius = 1;
     glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
     

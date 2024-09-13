@@ -347,39 +347,18 @@ bool Mesh::CheckCollision(Mesh* other)
 
 bool Mesh::SphereCollision(Mesh* other)
 {
+    float distance = glm::length(globalPosition - other->globalPosition);
+    float sumRadius = Radius + other->Radius;
     
-    auto P0 = globalPosition - velocity;
-    auto Q0 = other->globalPosition - other->velocity;
-    auto A = P0 - Q0;
-    auto B = velocity - other->velocity;
-    auto AB = glm::dot(A, B);
-    auto AA = glm::dot(A, A);
-    auto BB = glm::dot(B, B);
-    auto d = Radius + other->Radius;
-    auto rot = AB * AB - BB * (AA - d * d);
-
-    float t = 1.f;
-    if (rot >= 0)
-    {
-        t = (-AB - sqrt(rot));
-    }
-    if (BB > FLT_EPSILON)
-    {
-        t = t/BB;
-    }
+    bool collision = distance < sumRadius;
     
-    bool collision = t >= 0 && t <= 1;
-
     if (collision)
     {
-        //cout collision
-        std::cout << "Collision detected" << std::endl;
+        std::cout << "Sphere Collision detected" << std::endl;
         glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
-
-        // Reflect velocity
+        
         velocity = glm::reflect(velocity, collisionNormal);
     }
-
     return collision;
 }
 
@@ -456,4 +435,55 @@ void Mesh::DrawBoundingBox(unsigned int shaderProgram)
 void Mesh::Physics(float deltaTime)
 {
     globalPosition += velocity * deltaTime;
+}
+
+bool Mesh::SphereToAABBCollision(Mesh* other)
+{
+    glm::vec3 closestPoint = other->ClosestPointOnAABB(globalPosition);
+    float distance = glm::length(closestPoint-globalPosition);
+
+    bool collision = distance < Radius;
+
+    if (collision)
+    {
+        std::cout << "Sphere AABB Collision detected" << std::endl;
+        glm::vec3 collisionNormal = glm::normalize(globalPosition - closestPoint);
+
+        velocity = glm::reflect(velocity, collisionNormal);
+    }
+    return collision;
+}
+
+glm::vec3 Mesh::ClosestPointOnAABB(glm::vec3& point) const
+{
+    glm::vec3 closestPoint = point;
+
+    if (point.x < minVert.x)
+    {
+        closestPoint.x = minVert.x;
+    }
+    else if (point.x > maxVert.x)
+    {
+        closestPoint.x = maxVert.x;
+    }
+
+    if (point.y < minVert.y)
+    {
+        closestPoint.y = minVert.y;
+    }
+    else if (point.y > maxVert.y)
+    {
+        closestPoint.y = maxVert.y;
+    }
+    
+    if (point.z < minVert.z)
+    {
+        closestPoint.z = minVert.z;
+    }
+    else if (point.z > maxVert.z)
+    {
+        closestPoint.z = maxVert.z;
+    }
+
+    return closestPoint;
 }

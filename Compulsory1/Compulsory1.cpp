@@ -22,6 +22,12 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram);
 
 void CollisionChecking();
 
+glm::vec3 RandomColor();
+
+
+std::vector<Mesh*> wallMeshes;
+std::vector<Mesh*> sphereMeshes;
+
 
 Math math;
 
@@ -86,8 +92,14 @@ void DrawObjects(unsigned VAO, Shader ShaderProgram)
     glBindVertexArray(VAO);
     // glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    sphere_mesh.Draw(ShaderProgram.ID);
-    sphere2Mesh.Draw(ShaderProgram.ID);
+    // sphere_mesh.Draw(ShaderProgram.ID);
+    // sphere2Mesh.Draw(ShaderProgram.ID);
+
+    //draw all meshes
+    for (Mesh* sphere : sphereMeshes)
+    {
+        sphere->Draw(ShaderProgram.ID);
+    }
     
     plane_mesh.Draw(ShaderProgram.ID);
 
@@ -148,7 +160,14 @@ void render(GLFWwindow* window, Shader ourShader, unsigned VAO)
         CameraMesh.globalPosition = MainCamera.cameraPos;
         CameraMesh.CalculateBoundingBox();
 
-        sphere_mesh.Physics(deltaTime);
+        plane_mesh.CalculateBoundingBox();
+        
+        //for every sphere do physics
+        for (Mesh* sphere : sphereMeshes)
+        {
+            sphere->Physics(deltaTime);
+        }
+        
         //cout camera position
         //std::cout << "Camera Position: " << MainCamera.cameraPos.x << " " << MainCamera.cameraPos.y << " " << MainCamera.cameraPos.z << std::endl;
         
@@ -179,21 +198,41 @@ void SetupMeshes()
 {
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
+
+    for (int i = 0; i < 8; ++i) {
+        Mesh* sphere = new Mesh(Sphere, 1.f, 4, RandomColor());
+        sphere->globalPosition = glm::vec3(
+            static_cast<float>(rand()) / RAND_MAX * 8.0f - 3.0f, // Random x position from -2 to 2
+            0.5f, // y position
+            static_cast<float>(rand()) / RAND_MAX * 8.0f - 3.0f  // Random z position from -2 to 2
+        );
+        sphere->globalScale = glm::vec3(0.2f, 0.2f, 0.2f);
+        sphere->velocity = glm::vec3(
+            static_cast<float>(rand()) / RAND_MAX * 4.0f - 2.0f, // Random x velocity from -2 to 2
+            0.0f, // y velocity
+            static_cast<float>(rand()) / RAND_MAX * 4.0f - 2.0f  // Random z velocity from -2 to 2
+        );
+        sphereMeshes.push_back(sphere);
+    }
     
-    sphere_mesh = Mesh(Sphere, 1.f, 4, colors.red);
-    sphere_mesh.globalPosition.y = 0.5f;
-    sphere_mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
-
-    sphere2Mesh = Mesh(Sphere, 1.f, 4, colors.magenta);
-    sphere2Mesh.globalPosition.y = 0.5f;
-    sphere2Mesh.globalPosition.x = 4.f;
-    sphere2Mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
-
-    sphere_mesh.velocity = glm::vec3(0.4f, 0.0f, 0.0f);
+    // sphere_mesh = Mesh(Sphere, 1.f, 4, colors.red);
+    // sphere_mesh.globalPosition.y = 0.5f;
+    // sphere_mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
+    // sphereMeshes.push_back(&sphere_mesh);
+    //
+    // sphere2Mesh = Mesh(Sphere, 1.f, 4, colors.magenta);
+    // sphere2Mesh.globalPosition.y = 0.5f;
+    // sphere2Mesh.globalPosition.x = 2.f;
+    // sphere2Mesh.globalScale = glm::vec3(0.5f, 0.5f, 0.5f);
+    // sphereMeshes.push_back(&sphere2Mesh);
+    //
+    // sphere_mesh.velocity = glm::vec3(2.0f, 0.0f, 1.1f);
+    // sphere2Mesh.velocity = glm::vec3(-2.0f, 0.0f, -1.1f);
     
     
     plane_mesh = Mesh(Plane, 4, colors.green);
     plane_mesh.globalPosition.y = -0.5f;
+    wallMeshes.push_back(&plane_mesh);
 
 
     cube_mesh = Mesh(Cube, 1.f, colors.blue);
@@ -207,18 +246,22 @@ void SetupMeshes()
     wall1_mesh = Mesh(Cube, 1.f, colors.orange);
     wall1_mesh.globalPosition = glm::vec3(0.0f, 0.0f, -4.0f);
     wall1_mesh.globalScale = glm::vec3(wallScale, wallScale*heightScale, 0.1f);
+    wallMeshes.push_back(&wall1_mesh);
     
     wall2_mesh = Mesh(Cube, 1.f, colors.cyan);
     wall2_mesh.globalPosition = glm::vec3(0.0f, 0.0f, 4.0f);
     wall2_mesh.globalScale = glm::vec3(wallScale, wallScale*heightScale, 0.1f);
+    wallMeshes.push_back(&wall2_mesh);
     
     wall3_mesh = Mesh(Cube, 1.f, colors.yellow);
     wall3_mesh.globalPosition = glm::vec3(-4.0f, 0.0f, 0.0f);
     wall3_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
+    wallMeshes.push_back(&wall3_mesh);
     
     wall4_mesh = Mesh(Cube, 1.f, colors.blue);
     wall4_mesh.globalPosition = glm::vec3(4.0f, 0.0f, 0.0f);
     wall4_mesh.globalScale = glm::vec3(0.1f, wallScale*heightScale, wallScale);
+    wallMeshes.push_back(&wall4_mesh);
 }
 
 int main()
@@ -432,11 +475,38 @@ void CameraView(std::vector<unsigned> shaderPrograms, glm::mat4 trans, glm::mat4
 
 void CollisionChecking()
 {
-    sphere_mesh.SphereCollision(&sphere2Mesh);
-    sphere_mesh.CheckCollision(&wall1_mesh);
-    sphere_mesh.CheckCollision(&wall2_mesh);
-    sphere_mesh.CheckCollision(&wall3_mesh);
-    sphere_mesh.CheckCollision(&wall4_mesh);
+    for (Mesh* wall : wallMeshes)
+    {
+        for (Mesh* sphere : sphereMeshes)
+        {
+            sphere->SphereToAABBCollision(wall);
+        }
+    }
+    
+    for (Mesh* sphere : sphereMeshes)
+    {
+        for (Mesh* sphere2 : sphereMeshes)
+        {
+            if (sphere != sphere2)
+            {
+                sphere->SphereCollision(sphere2);
+            }
+        }
+    }
 
+    // sphere_mesh.SphereCollision(&sphere2Mesh);
+    // sphere_mesh.SphereToAABBCollision(&wall1_mesh);
+    // sphere_mesh.SphereToAABBCollision(&wall2_mesh);
+    // sphere_mesh.SphereToAABBCollision(&wall3_mesh);
+    // sphere_mesh.SphereToAABBCollision(&wall4_mesh);
+    
 }
 
+glm::vec3 RandomColor()
+{
+    return glm::vec3(
+    (rand() % 256) / 255.0f,
+    (rand() % 256) / 255.0f,
+    (rand() % 256) / 255.0f
+);
+}
