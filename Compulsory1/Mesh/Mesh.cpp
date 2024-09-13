@@ -341,7 +341,7 @@ bool Mesh::SphereCollision(Mesh* other)
         globalPosition += collisionNormal * (penetrationDepth / 2.0f);
         other->globalPosition -= collisionNormal * (penetrationDepth / 2.0f);
 
-        // Reflect velocity
+        // Refect on poor life choices
         velocity = glm::reflect(velocity, collisionNormal);
         other->velocity = glm::reflect(other->velocity, -collisionNormal);
     }
