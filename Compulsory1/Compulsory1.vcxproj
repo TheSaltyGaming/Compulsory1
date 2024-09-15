@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Compulsory1.cpp" />
     <ClCompile Include="Dependency\includes\glm\detail\glm.cpp" />
     <ClCompile Include="glad.c" />
@@ -171,6 +172,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Dependency\includes\assimp\aabb.h" />
     <ClInclude Include="Dependency\includes\assimp\ai_assert.h" />
     <ClInclude Include="Dependency\includes\assimp\anim.h" />
