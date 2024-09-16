@@ -370,6 +370,9 @@ void Mesh::Physics(float deltaTime)
     globalPosition += velocity * deltaTime;
 }
 
+/// 
+/// @param point object to check against
+/// @return closest point on AABB to object
 glm::vec3 Mesh::ClosestPointOnAABB(glm::vec3& point) const
 {
     glm::vec3 closestPoint = point;

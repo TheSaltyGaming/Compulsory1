@@ -25,11 +25,6 @@ bool Collision::AABBCollision(Mesh* mesh1, Mesh* other)
     
     if (collision)
     {
-        //std::cout << "Collision detected" << std::endl;
-        //print overlap x y and z
-        
-
-        // Calculate collision normal
         glm::vec3 collisionNormal = glm::normalize(mesh1->globalPosition - other->globalPosition);
 
         // Reflect velocity

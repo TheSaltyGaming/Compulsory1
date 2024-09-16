@@ -194,7 +194,7 @@ void SetupMeshes()
 {
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
-    int SphereCount = 50;
+    int SphereCount = 200;
     
     for (int i = 0; i < SphereCount; ++i) {
         Mesh* sphere = new Mesh(Sphere, 1.f, 4, RandomColor());
@@ -205,10 +205,7 @@ void SetupMeshes()
         math.RandomVec3(-3, 3).z);
         
         sphere->globalScale = glm::vec3(0.1f, 0.1f, 0.1f);
-        sphere->velocity = glm::vec3(
-        math.RandomVec3(-2, 2).x,
-        0.0f, // y
-        math.RandomVec3(-2, 2).z); // Random z velocity from -2 to 2
+        sphere->velocity = glm::vec3(0.f);
 
         sphereMeshes.push_back(sphere);
     }
@@ -352,15 +349,25 @@ void processInput(GLFWwindow* window)
 
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
     {
-        //get a random sphere and set velocity to 5 on x and 4 on y
+        //make random sphere move
         int randomSphere = rand() % sphereMeshes.size();
         if (sphereMeshes[randomSphere]->velocity == glm::vec3(0.f,0.f,0.f))
         {
             sphereMeshes[randomSphere]->velocity = glm::vec3(math.RandomVec3(-2, 2).x, 0.0f, math.RandomVec3(-2, 2).z);
         }
     }
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
+    {
+        //make all spheres move
+        for (auto ballsphere : sphereMeshes)
+        {
+            ballsphere->velocity = glm::vec3(math.RandomVec3(-2, 2).x, 0.0f, math.RandomVec3(-2, 2).z);
+
+        }
+    }
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
     {
+        //stop all velocity
         for (Mesh* sphere : sphereMeshes)
         {
             sphere->velocity = glm::vec3(0.0f, 0.0f, 0.0f);
