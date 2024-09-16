@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Camera.h"
+#include "Collision.h"
 #include "Math.h"
 #include "Mesh/Mesh.h"
 #include "Mesh/Surface.h"
@@ -30,6 +31,7 @@ std::vector<Mesh*> sphereMeshes;
 
 
 Math math;
+Collision collision;
 
 Mesh sphere_mesh;
 
@@ -192,14 +194,14 @@ void SetupMeshes()
 {
     //Create meshes here, Make meshes here, Setup meshes here, define meshes here, setupObjects setup objects create objects
     //(this comment is for CTRL + F search)
-    int SphereCount = 40;
+    int SphereCount = 50;
     
     for (int i = 0; i < SphereCount; ++i) {
         Mesh* sphere = new Mesh(Sphere, 1.f, 4, RandomColor());
 
         sphere->globalPosition = glm::vec3(
         math.RandomVec3(-3, 3).x,
-        0.5f, // y
+        0.5, // y
         math.RandomVec3(-3, 3).z);
         
         sphere->globalScale = glm::vec3(0.1f, 0.1f, 0.1f);
@@ -473,31 +475,26 @@ void CameraView(std::vector<unsigned> shaderPrograms, glm::mat4 trans, glm::mat4
 
 void CollisionChecking()
 {
+    int W = 0;
     for (Mesh* wall : wallMeshes)
     {
-        for (Mesh* sphere : sphereMeshes)
+        for (int i = 0; i < sphereMeshes.size(); ++i)
         {
-            sphere->SphereToAABBCollision(wall);
+            collision.SphereToAABBCollision(sphereMeshes[i], wall);
         }
+        W++;
     }
     
+    int p = 0;
     for (Mesh* sphere : sphereMeshes)
     {
-        for (Mesh* sphere2 : sphereMeshes)
-        {
-            if (sphere != sphere2)
-            {
-                sphere->SphereCollision(sphere2);
-            }
-        }
-    }
 
-    // sphere_mesh.SphereCollision(&sphere2Mesh);
-    // sphere_mesh.SphereToAABBCollision(&wall1_mesh);
-    // sphere_mesh.SphereToAABBCollision(&wall2_mesh);
-    // sphere_mesh.SphereToAABBCollision(&wall3_mesh);
-    // sphere_mesh.SphereToAABBCollision(&wall4_mesh);
-    
+        for (int i = p+1; i < sphereMeshes.size(); ++i)
+        {
+            collision.SphereCollision(sphere, sphereMeshes[i]);
+        }
+        p++;
+    }
 }
 
 glm::vec3 RandomColor()
