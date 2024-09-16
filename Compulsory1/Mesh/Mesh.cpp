@@ -295,59 +295,6 @@ void Mesh::Draw(unsigned shaderProgram)
     // DrawBoundingBox(shaderProgram);
 }
 
-bool Mesh::CheckCollision(Mesh* other)
-{
-    
-    bool overlapX = minVert.x <= other->maxVert.x && maxVert.x >= other->minVert.x;
-    bool overlapY = minVert.y <= other->maxVert.y && maxVert.y >= other->minVert.y;
-    bool overlapZ = minVert.z <= other->maxVert.z && maxVert.z >= other->minVert.z;
-    
-    bool collision = overlapX && overlapY && overlapZ;
-
-    std::cout << overlapX << " " << overlapY << " " << overlapZ << std::endl;
-    
-    if (collision)
-    {
-        //std::cout << "Collision detected" << std::endl;
-        //print overlap x y and z
-        
-
-        // Calculate collision normal
-        glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
-
-        // Reflect velocity
-        velocity = glm::reflect(velocity, collisionNormal);
-    }
-    
-    return collision;
-}
-
-bool Mesh::SphereCollision(Mesh* other)
-{
-    float distance = glm::length(globalPosition - other->globalPosition);
-    float sumRadius = Radius + other->Radius;
-    
-    bool collision = distance < sumRadius;
-    
-    if (collision)
-    {
-        std::cout << "Sphere Collision detected" << std::endl;
-        glm::vec3 collisionNormal = glm::normalize(globalPosition - other->globalPosition);
-        
-        
-        float penetrationDepth = sumRadius - distance;
-
-        // No more clipping hopefully
-        globalPosition += collisionNormal * (penetrationDepth / 2.0f);
-        other->globalPosition -= collisionNormal * (penetrationDepth / 2.0f);
-
-        // Refect on poor life choices
-        velocity = glm::reflect(velocity, collisionNormal);
-        other->velocity = glm::reflect(other->velocity, -collisionNormal);
-    }
-    return collision;
-}
-
 glm::mat4 Mesh::GetTransform()
 {
     glm::mat4 model = glm::mat4(1.0f);
@@ -421,23 +368,6 @@ void Mesh::DrawBoundingBox(unsigned int shaderProgram)
 void Mesh::Physics(float deltaTime)
 {
     globalPosition += velocity * deltaTime;
-}
-
-bool Mesh::SphereToAABBCollision(Mesh* other)
-{
-    glm::vec3 closestPoint = other->ClosestPointOnAABB(globalPosition);
-    float distance = glm::length(closestPoint-globalPosition);
-
-    bool collision = distance < Radius;
-
-    if (collision)
-    {
-        std::cout << "Sphere AABB Collision detected" << std::endl;
-        glm::vec3 collisionNormal = glm::normalize(globalPosition - closestPoint);
-
-        velocity = glm::reflect(velocity, collisionNormal);
-    }
-    return collision;
 }
 
 glm::vec3 Mesh::ClosestPointOnAABB(glm::vec3& point) const

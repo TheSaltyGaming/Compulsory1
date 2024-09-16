@@ -32,10 +32,6 @@ public:
     
     void Draw(unsigned int shaderProgram);
 
-    bool CheckCollision(Mesh* other);
-
-    bool SphereCollision(Mesh* other);
-
     glm::mat4 GetTransform();
     
     MeshType mType;
@@ -60,7 +56,6 @@ public:
 
     void Physics(float deltaTime);
 
-    bool SphereToAABBCollision(Mesh* other);
     glm::vec3 ClosestPointOnAABB(glm::vec3& point) const;
 
     float mass = 1;
