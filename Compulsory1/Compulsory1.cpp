@@ -200,9 +200,9 @@ void SetupMeshes()
         Mesh* sphere = new Mesh(Sphere, 1.f, 4, RandomColor());
 
         sphere->globalPosition = glm::vec3(
-        math.RandomVec3(-3, 3).x,
+        math.RandomVec3(-3.7, 3.7).x,
         0.5, // y
-        math.RandomVec3(-3, 3).z);
+        math.RandomVec3(-3.7, 3.7).z);
         
         sphere->globalScale = glm::vec3(0.1f, 0.1f, 0.1f);
         sphere->velocity = glm::vec3(0.f);
@@ -259,7 +259,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Test Win", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Architect Engine", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
