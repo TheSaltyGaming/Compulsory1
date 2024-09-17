@@ -52,10 +52,25 @@ bool Collision::SphereCollision(Mesh* mesh1, Mesh* other)
         // No more clipping hopefully
         mesh1->globalPosition += collisionNormal * (penetrationDepth / 2.0f);
         other->globalPosition -= collisionNormal * (penetrationDepth / 2.0f);
-    
-        // Refect on poor life choices
-        mesh1->velocity = glm::reflect(mesh1->velocity, collisionNormal);
-        other->velocity = glm::reflect(other->velocity, -collisionNormal);
+
+        // Relative velocity along normal
+        glm::vec3 relativeVelocity = mesh1->velocity - other->velocity;
+        float velocityAlongNormal = glm::dot(relativeVelocity, collisionNormal);
+
+        // Ignore sphere not moving towards each other
+        if (velocityAlongNormal > 0) return false;
+        
+        // Bounciness
+        float e = 1.f;
+        
+        float mass1 = mesh1->mass;
+        float mass2 = other->mass;
+        float impulseMagnitude = -(1 + e) * velocityAlongNormal / (1 / mass1 + 1 / mass2);
+        
+        glm::vec3 impulse = impulseMagnitude * collisionNormal;
+        
+        mesh1->velocity += impulse / mass1;
+        other->velocity -= impulse / mass2;
     }
     return collision;
 }
