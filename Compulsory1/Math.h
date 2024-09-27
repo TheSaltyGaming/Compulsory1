@@ -26,6 +26,8 @@ public:
 
     glm::vec3 RandomVec3(float min, float max);
 
+    glm::vec3 deCasteljau(std::vector<glm::vec3> points, float t);
+
     
     
     

@@ -353,7 +353,7 @@ void processInput(GLFWwindow* window)
         int randomSphere = rand() % sphereMeshes.size();
         if (sphereMeshes[randomSphere]->velocity == glm::vec3(0.f,0.f,0.f))
         {
-            sphereMeshes[randomSphere]->velocity = glm::vec3(math.RandomVec3(-2, 2).x, 0.0f, math.RandomVec3(-2, 2).z);
+            sphereMeshes[randomSphere]->velocity = glm::vec3(math.RandomVec3(-4, 4).x, 0.0f, math.RandomVec3(-4, 4).z);
         }
     }
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)

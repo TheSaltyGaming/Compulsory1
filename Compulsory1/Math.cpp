@@ -149,5 +149,17 @@ glm::vec3 Math::RandomVec3(float min, float max)
     return glm::vec3(x, y, z);
 }
 
+glm::vec3 Math::deCasteljau(std::vector<glm::vec3> points, float t)
+{
+    for (int i = 0; i < points.size() - 1; i++)
+    {
+        for (int j = 0; j < points.size() - i - 1; j++)
+        {
+            points[j] = points[j] * (1 - t)  + points[j + 1] * t;
+        }
+    }
+    return points[0];
+}
+
 
 
